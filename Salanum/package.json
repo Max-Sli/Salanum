@@ -1,0 +1,20 @@
+{
+  "name": "salanum",
+  "version": "1.0.0",
+  "description": "Salanum - Decentralized messenger with Solana blockchain integration, AI-powered message masking, and Keeper neural security",
+  "main": "server/index.js",
+  "scripts": {
+    "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "server": "cd server && npm run dev",
+    "client": "cd client && npm start",
+    "build": "cd client && npm run build",
+    "install-all": "npm install && cd server && npm install && cd ../client && npm install"
+  },
+  "keywords": ["messenger", "blockchain", "solana", "ai", "encryption"],
+  "author": "Your Name",
+  "license": "MIT",
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
+

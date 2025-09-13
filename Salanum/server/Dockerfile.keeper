@@ -1,0 +1,47 @@
+# Dockerfile для изолированного контейнера Хранителя
+FROM node:18-alpine
+
+# Установка необходимых пакетов
+RUN apk add --no-cache \
+    dumb-init \
+    && addgroup -g 1001 -S keeper \
+    && adduser -S keeper -u 1001
+
+# Создание рабочей директории
+WORKDIR /app
+
+# Копирование package.json и установка зависимостей
+COPY package*.json ./
+RUN npm ci --only=production && npm cache clean --force
+
+# Копирование исходного кода
+COPY . .
+
+# Создание директорий для логов и данных
+RUN mkdir -p /app/logs /app/data && \
+    chown -R keeper:keeper /app
+
+# Переключение на непривилегированного пользователя
+USER keeper
+
+# Ограничения безопасности
+# - Нет доступа к сети (кроме localhost)
+# - Ограниченный доступ к файловой системе
+# - Ограничения памяти и CPU
+
+# Переменные окружения
+ENV NODE_ENV=production
+ENV KEEPER_MODE=offline
+ENV KEEPER_ISOLATION=true
+ENV KEEPER_OFFLINE_PORT=3001
+
+# Открытие порта
+EXPOSE 3001
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+    CMD node healthcheck.js
+
+# Запуск приложения
+ENTRYPOINT ["dumb-init", "--"]
+CMD ["node", "keeper-offline-server.js"]
